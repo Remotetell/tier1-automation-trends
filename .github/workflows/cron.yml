@@ -1,0 +1,27 @@
+name: Global SEO Content Pipeline
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Compute Analytics and Templates
+        env:
+          MONDIAD_CLIENT_ID: ${{ secrets.MONDIAD_CLIENT_ID }}
+          MONDIAD_SECRET: ${{ secrets.MONDIAD_SECRET }}
+        run: python scraper.py
+      - name: Deploy Production Release
+        run: |
+          git config --global user.name "SEO Platform Engine"
+          git config --global user.email "engine@cloud.core"
+          git add index.html
+          git commit -m "PageSpeed Optimized Refresh" || exit 0
+          git push
+
